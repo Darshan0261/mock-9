@@ -1,7 +1,8 @@
 const express = require('express');
 
 const { PostModel } = require('../models/Post.model');
-const { authentication } = require('../middlewares/authorization')
+const { authentication } = require('../middlewares/authorization');
+const { UserModel } = require('../models/User.model');
 
 const postsRouter = express.Router();
 
@@ -24,6 +25,9 @@ postsRouter.post('/', authentication, async (req, res) => {
         }
         const post = new PostModel(payload);
         await post.save();
+        const user = await UserModel.findOne({_id: userData.id});
+        user.posts.push(post._id)
+        await user.save()
         return res.status(201).send({ message: 'New Post posted Sucessfully' });
     } catch (error) {
         return res.status(501).send({ message: error.message })
